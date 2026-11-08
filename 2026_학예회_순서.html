@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2026 학예회 순서 · 1학년 2반 꿈 키움 재능마당</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --line:#444; --yellow:#ffd966; --orange:#f6b48a; --peach:#f7cbae;
+  --font:'Jua','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0e0e10;overflow:hidden;font-family:var(--font);-webkit-user-select:none;user-select:none}
+body.idle{cursor:none}
+
+/* ===== 무대: 1920x1080 고정 크기를 화면에 맞춰 축소/확대 ===== */
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin:-540px 0 0 -960px;transform-origin:50% 50%;overflow:hidden;background:#000}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;overflow:hidden}
+.slide.on{opacity:1;visibility:visible}
+
+/* ===== 배경 ===== */
+.bg-sky{background:linear-gradient(#b9e4fb,#d9f1fd)}
+.bg-blue,.bg-peach{background-size:48px 48px;background-image:
+  linear-gradient(rgba(255,255,255,.7) 2px,transparent 2px),
+  linear-gradient(90deg,rgba(255,255,255,.7) 2px,transparent 2px)}
+.bg-blue{background-color:#dbe8f6}
+.bg-peach{background-color:#fbe4d4}
+.bg-blobs{background:#fddcc4}
+.bg-blobs::after{content:'';position:absolute;inset:0;background-size:210px 210px;background-image:
+  linear-gradient(rgba(255,255,255,.55) 4px,transparent 4px),
+  linear-gradient(90deg,rgba(255,255,255,.55) 4px,transparent 4px)}
+.blob{position:absolute;border-radius:50%}
+.bg-black{background:#000}
+
+/* 구름 */
+.cl{position:absolute;width:var(--w);height:calc(var(--w)*.46);background:#fff;border-radius:999px}
+.cl::before,.cl::after{content:'';position:absolute;background:#fff;border-radius:50%}
+.cl::before{left:16%;top:-42%;width:42%;height:95%}
+.cl::after{left:46%;top:-58%;width:50%;height:115%}
+.cb{position:absolute;background:#fff;border-radius:50%}
+
+/* 장식 */
+.spark{position:absolute;width:var(--s,60px);height:var(--s,60px);animation:twinkle 2.4s ease-in-out infinite alternate;animation-delay:var(--d,0s)}
+@keyframes twinkle{from{transform:scale(.7) rotate(0);opacity:.6}to{transform:scale(1.1) rotate(15deg);opacity:1}}
+.conf{position:absolute;opacity:.9}
+
+/* ===== 박스 (캔바의 둥근 테두리 박스) ===== */
+.box{position:absolute;left:0;right:0;margin:0 auto;display:flex;align-items:center;justify-content:center;
+  border:7px solid var(--line);border-radius:40px;padding:0 50px;color:#2b2b2b;text-align:center;white-space:nowrap}
+.box>span{display:block;flex:none;line-height:1.3}
+.w{background:#fff}.y{background:var(--yellow)}.o{background:var(--orange)}.p{background:var(--peach)}
+
+/* 푸들 */
+.puppy{position:absolute;left:0;right:0;margin:0 auto;width:520px;bottom:-30px}
+.puppy svg{display:block;width:100%;height:auto;animation:bob 2.2s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-14px)}}
+.warn{position:absolute;width:150px;height:150px;border-radius:50%;background:#fff;border:7px solid var(--line);display:grid;place-items:center}
+
+/* 함께 나눠요 카드 */
+.card{position:absolute;top:396px;width:415px;height:620px;border:6px solid var(--line);border-radius:34px;
+  display:flex;flex-direction:column;align-items:center;padding-top:50px;font-size:62px;line-height:1.3;text-align:center;color:#2b2b2b}
+.card svg{width:230px;height:230px;margin-bottom:34px}
+
+/* 등장 애니메이션 (슬라이드가 켜질 때마다) */
+.slide.on .pop{animation:pop .6s var(--d,0s) both cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{opacity:0;transform:scale(.86) translateY(34px)}to{opacity:1;transform:none}}
+
+/* 기다렸죠? */
+.wait{position:absolute;inset:0;display:grid;place-items:center}
+.wait span{font-size:210px;letter-spacing:.28em;padding-left:.28em;
+  background:linear-gradient(#fff,#a9d6ff 55%,#4b90ff);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 22px rgba(70,150,255,.85));animation:glow 2.4s ease-in-out infinite alternate}
+.slide.on .wait span{animation:fadein 1s both, glow 2.4s 1s ease-in-out infinite alternate}
+@keyframes fadein{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes glow{from{filter:drop-shadow(0 0 14px rgba(70,150,255,.6))}to{filter:drop-shadow(0 0 40px rgba(90,170,255,1))}}
+
+/* ===== 음악 위젯 (해당 슬라이드에서만 표시) ===== */
+#music{position:absolute;right:48px;bottom:44px;width:460px;z-index:20;display:none}
+#music.show{display:block}
+.m-card{background:#fff;border:7px solid var(--line);border-radius:30px;overflow:hidden;box-shadow:0 10px 0 rgba(0,0,0,.18)}
+.m-video{position:relative;width:100%;aspect-ratio:16/9;background:#111}
+.m-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.m-thumb{position:absolute;inset:0;z-index:1;background:#222 center/cover no-repeat;transition:opacity .3s}
+#music.started .m-thumb{opacity:0}
+.m-hit{position:absolute;inset:0;z-index:3;cursor:pointer;display:grid;place-items:center}
+.m-play{width:120px;height:120px;border-radius:50%;background:rgba(255,217,102,.96);border:7px solid var(--line);
+  display:grid;place-items:center;font-size:50px;color:#333;transition:transform .15s,opacity .2s;padding-left:6px}
+.m-hit:hover .m-play{transform:scale(1.08)}
+#music.playing .m-play{opacity:0}
+#music.playing .m-hit:hover .m-play{opacity:1}
+.m-info{padding:12px 20px 14px;font-size:32px;color:#333;display:flex;justify-content:space-between;gap:12px;white-space:nowrap}
+.m-info b{font-weight:400;overflow:hidden;text-overflow:ellipsis}
+.m-bar{height:12px;background:#eee}
+.m-bar i{display:block;height:100%;width:0;background:var(--orange)}
+.m-msg{display:none;padding:10px 20px 14px;font-family:'Noto Sans KR',sans-serif;font-size:26px;line-height:1.4;color:#b3261e;background:#fff3f1;white-space:normal}
+#music.err .m-msg{display:block}
+
+/* 소리만 재생 모드: 영상은 화면 밖에 두고 ▶ 버튼만 보여줌 */
+#music.audio{width:auto;right:90px;bottom:80px}
+#music.audio .m-card{background:none;border:0;box-shadow:none;overflow:visible;border-radius:0}
+#music.audio .m-video{position:static;aspect-ratio:auto;background:none}
+#music.audio .m-video iframe{position:absolute;left:-9999px;top:0;width:320px;height:180px}
+#music.audio .m-thumb,#music.audio .m-bar,#music.audio .m-info{display:none}
+#music.audio .m-hit{position:static;inset:auto}
+#music.audio .m-play{width:130px;height:130px;font-size:54px;box-shadow:0 8px 0 rgba(0,0,0,.2)}
+#music.audio.playing .m-play{opacity:1}
+#music.audio .m-msg{position:absolute;right:0;bottom:160px;width:560px;border:5px solid var(--line);border-radius:20px}
+
+/* ===== 조작 바 / 목차 (화면 비율과 무관하게 항상 같은 크기) ===== */
+#ui{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:6px;
+  background:rgba(20,20,22,.78);backdrop-filter:blur(6px);border-radius:999px;padding:6px 10px;opacity:0;transition:opacity .25s;font-family:'Noto Sans KR',sans-serif}
+body.active #ui{opacity:1}
+#ui button{all:unset;cursor:pointer;color:#fff;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;font-size:18px}
+#ui button:hover,#ui button:focus-visible{background:rgba(255,255,255,.2)}
+#pg{color:#fff;font-size:15px;min-width:74px;text-align:center}
+#overview{position:fixed;inset:0;z-index:60;background:rgba(14,14,16,.94);overflow:auto;padding:28px;font-family:'Noto Sans KR',sans-serif}
+#overview[hidden]{display:none}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.ov-grid button{all:unset;cursor:pointer;background:#25252a;color:#eee;border-radius:12px;padding:12px 14px;font-size:15px;line-height:1.4;box-sizing:border-box}
+.ov-grid button:hover,.ov-grid button:focus-visible{background:#3a3a42}
+.ov-grid button.cur{outline:3px solid var(--yellow)}
+.ov-grid em{display:block;font-style:normal;font-size:13px;color:#ffd966;margin-bottom:2px}
+
+@media (prefers-reduced-motion:reduce){
+  .slide,.slide.on .pop,.puppy svg,.spark,.wait span{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="music">
+    <div class="m-card">
+      <div class="m-video">
+        <div id="ytplayer"></div>
+        <div class="m-thumb" id="mThumb"></div>
+        <div class="m-hit" id="mHit" role="button" tabindex="0" aria-label="음악 재생 / 일시정지"><div class="m-play" id="mIco">▶</div></div>
+      </div>
+      <div class="m-bar"><i id="mProg"></i></div>
+      <div class="m-info"><b id="mTitle">음악</b><span id="mTime"></span></div>
+      <div class="m-msg" id="mMsg"></div>
+    </div>
+  </div>
+</div>
+
+<div id="ui">
+  <button id="bPrev" aria-label="이전 슬라이드">◀</button>
+  <span id="pg">1 / 40</span>
+  <button id="bNext" aria-label="다음 슬라이드">▶</button>
+  <button id="bOv" aria-label="목차 (O)" title="목차 (O)">☰</button>
+  <button id="bFs" aria-label="전체화면 (F)" title="전체화면 (F)">⛶</button>
+</div>
+<div id="overview" hidden><div class="ov-grid" id="ovGrid"></div></div>
+
+<script>
+/* =====================================================================
+   ★ 음악 설정 — 여기만 고치면 됩니다 ★
+   형식:  슬라이드번호: { id:'유튜브 영상 ID', start:'분:초', end:'분:초', title:'표시할 이름' }
+   - 슬라이드 번호는 캔바 페이지 번호와 같습니다 (1~40)
+   - 유튜브 ID: youtube.com/watch?v=【여기】 / youtu.be/【여기】
+   - audioOnly:true 이면 영상 없이 ▶ 버튼만 보입니다 (소리만 재생)
+   - 예)  8: { id:'abcDEF12345', start:'0:30', end:'1:45', audioOnly:true },
+   ===================================================================== */
+const MUSIC = {
+  8: { id:'yebNIHKAC4A', start:'0:00', end:'1:37', audioOnly:true },
+};
+
+/* ===== 발표 순서 데이터 (캔바 내용 그대로) ===== */
+const PERFORMANCES = [
+  ['네잎 클로버','1학년 2반 모두'],
+  ['태권도 품새 고려','김민규, 이준우, 조운'],
+  ['댄스','김민아, 박서아'],
+  ['징글벨 락','박새룬'],
+  ['초성 퀴즈','박서율, 윤설희'],
+  ['동화 구연','박하솔'],
+  ['노래 부르기','손승연, 이하린'],
+  ['그림 발표','안채원, 이시예'],
+  ['퀴즈','안아린'],
+  ['방송 댄스','양지원'],
+  ['병뚜껑 마술','이시윤'],
+  ['이웃나라 국기 퀴즈','박준서'],
+  ['오카리나 연주','이가은'],
+  ['즐거운 줄넘기','팽시현'],
+  ['곰 세마리 칼림바','차하준'],
+  ['혜리의 소다팝','차혜리'],
+  ['합창','1학년 2반 모두']
+];
+
+/* ===== 그림 조각 만들기 (푸들, 구름, 반짝이, 색종이) ===== */
+const FUR='#cf8a37', INK='#4b3a2f';
+
+function puppy(mood){            // mood: happy | clap | stern
+  const c=[[300,270,172]];
+  for(let a=0;a<360;a+=30){const r=a*Math.PI/180;c.push([300+168*Math.cos(r),270+168*Math.sin(r),62]);}
+  c.push([105,330,66],[495,330,66],[300,95,56],[245,105,50],[355,105,50]);
+  const mk=(extra)=>c.map(([x,y,r])=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${FUR}" ${extra}/>`).join('');
+  const head=`<g transform="translate(0,250) scale(1,.74) translate(0,-270)">${mk(`stroke="${INK}" stroke-width="9" vector-effect="non-scaling-stroke"`)}${mk('')}</g>`;
+  const eye=(x)=>`<ellipse cx="${x}" cy="252" rx="${mood==='stern'?15:17}" ry="${mood==='stern'?17:22}" fill="#2a2018"/><circle cx="${x-5}" cy="244" r="6" fill="#fff"/>`;
+  const brows=mood==='stern'?`<path d="M190 212 L258 238 M410 212 L342 238" stroke="${INK}" stroke-width="10" stroke-linecap="round"/>`:'';
+  const mouth=mood==='stern'
+    ?`<path d="M276 322 Q300 302 324 322" fill="none" stroke="${INK}" stroke-width="7" stroke-linecap="round"/>`
+    :`<path d="M270 306 Q285 332 300 308 Q315 332 330 306" fill="none" stroke="${INK}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const face=`${brows}${eye(232)}${eye(368)}
+    <ellipse cx="184" cy="294" rx="30" ry="17" fill="#ee8a78" opacity=".55"/><ellipse cx="416" cy="294" rx="30" ry="17" fill="#ee8a78" opacity=".55"/>
+    <ellipse cx="300" cy="284" rx="22" ry="15" fill="#4a3228"/><ellipse cx="294" cy="279" rx="6" ry="3.5" fill="#fff" opacity=".6"/>${mouth}`;
+  let paws='',stars='';
+  if(mood==='clap'){
+    paws=`<g stroke="${INK}" stroke-width="8"><circle cx="262" cy="415" r="50" fill="${FUR}"/><circle cx="338" cy="415" r="50" fill="${FUR}"/></g><circle cx="262" cy="415" r="46" fill="${FUR}"/><circle cx="338" cy="415" r="46" fill="${FUR}"/>
+      <path d="M300 372 V458" stroke="${INK}" stroke-width="6"/>`;
+    const st=(x,y,s)=>`<path transform="translate(${x},${y}) scale(${s})" d="M0 -20 L5 -5 L20 0 L5 5 L0 20 L-5 5 L-20 0 L-5 -5Z" fill="#e3a62b" stroke="#8a5d12" stroke-width="2"/>`;
+    stars=st(100,380,1.3)+st(500,380,1.3)+st(70,310,.8)+st(535,310,.8);
+  }else{
+    paws=`<g stroke="${INK}" stroke-width="8"><circle cx="190" cy="425" r="46" fill="${FUR}"/><circle cx="410" cy="425" r="46" fill="${FUR}"/></g><circle cx="190" cy="425" r="42" fill="${FUR}"/><circle cx="410" cy="425" r="42" fill="${FUR}"/>`;
+  }
+  return `<svg viewBox="0 0 600 480" aria-hidden="true">${head}${face}${paws}${stars}</svg>`;
+}
+const puppyBox=(mood,d)=>`<div class="puppy pop" style="--d:${d||.2}s">${puppy(mood)}</div>`;
+
+const cloud=(x,y,w)=>`<div class="cl" style="left:${x}px;top:${y}px;--w:${w}px"></div>`;
+function cloudBank(){               // 화면 아래쪽 구름
+  let h='';
+  for(let i=0;i<13;i++){
+    const w=250+(i%4)*45, x=i*165-110, b=-70-(i%3)*22;
+    h+=`<i class="cb" style="left:${x}px;bottom:${b}px;width:${w}px;height:${w}px"></i>`;
+  }
+  return h;
+}
+const spark=(x,y,s,col,d)=>`<svg class="spark" style="left:${x}px;top:${y}px;--s:${s}px;--d:${d||0}s" viewBox="0 0 40 40"><path d="M20 0 L25 15 L40 20 L25 25 L20 40 L15 25 L0 20 L15 15Z" fill="${col||'#f7a8b8'}"/></svg>`;
+function confetti(cx,cy,n,seed){     // 색종이 폭죽 (항상 같은 모양이 나오도록 난수를 고정)
+  let s=seed, h=''; const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};
+  const cols=['#ff7a6b','#ffd04d','#5fc7f0','#8be08b','#ff9ed0','#fff'];
+  for(let i=0;i<n;i++){
+    const a=rnd()*Math.PI*2, d=40+rnd()*300, sz=7+rnd()*11;
+    const x=cx+Math.cos(a)*d*1.1, y=cy+Math.sin(a)*d*.9+rnd()*80;
+    h+=`<i class="conf" style="left:${x|0}px;top:${y|0}px;width:${sz|0}px;height:${(rnd()>.5?sz:sz*.45)|0}px;background:${cols[(rnd()*cols.length)|0]};border-radius:${rnd()>.5?'50%':'2px'};transform:rotate(${(rnd()*180)|0}deg)"></i>`;
+  }
+  return h;
+}
+function box(cls,html,top,w,h,fs,d){
+  return `<div class="box ${cls} pop fit" data-size="${fs}" style="top:${top}px;width:${w}px;height:${h}px;font-size:${fs}px;--d:${d||0}s"><span>${html}</span></div>`;
+}
+
+/* 함께 나눠요 아이콘 */
+const ICON={
+  bulb:`<svg viewBox="0 0 100 100"><g stroke="#3a3a3a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><path d="M50 8v8M20 20l6 6M80 20l-6 6M8 48h8M92 48h-8" fill="none" stroke="#f2b705"/><path d="M50 22c-14 0-24 10-24 23 0 9 5 14 9 19 2 3 3 5 3 9h24c0-4 1-6 3-9 4-5 9-10 9-19 0-13-10-23-24-23z" fill="#ffd400"/><rect x="39" y="76" width="22" height="7" rx="3" fill="#bbb"/><rect x="42" y="85" width="16" height="7" rx="3" fill="#999"/><path d="M40 52l6-8 6 10 6-8" fill="none"/></g></svg>`,
+  cup:`<svg viewBox="0 0 100 100"><g stroke="#3a3a3a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><path d="M28 14h44v22c0 14-10 24-22 24S28 50 28 36z" fill="#ffd400"/><path d="M28 22H14c0 14 6 22 16 24M72 22h14c0 14-6 22-16 24" fill="none"/><rect x="44" y="60" width="12" height="14" fill="#ffd400"/><rect x="30" y="74" width="40" height="14" rx="4" fill="#4a68b8"/><path d="M50 22l4 9 10 1-8 6 3 10-9-6-9 6 3-10-8-6 10-1z" fill="#ff8a3d" stroke-width="2"/></g></svg>`,
+  heart:`<svg viewBox="0 0 100 100"><g stroke="#3a3a3a" stroke-width="4" stroke-linejoin="round"><path d="M50 32c-9-14-28-6-24 9 3 9 16 16 24 20 8-4 21-11 24-20 4-15-15-23-24-9z" fill="#ff7ea8"/><circle cx="34" cy="70" r="17" fill="#f2dcc4"/><circle cx="66" cy="70" r="17" fill="#e8c9a8"/><circle cx="29" cy="68" r="2.5" fill="#3a3a3a" stroke="none"/><circle cx="40" cy="68" r="2.5" fill="#3a3a3a" stroke="none"/><circle cx="61" cy="68" r="2.5" fill="#3a3a3a" stroke="none"/><circle cx="72" cy="68" r="2.5" fill="#3a3a3a" stroke="none"/><path d="M30 76q5 4 10 0M62 76q5 4 10 0" fill="none" stroke-width="3" stroke-linecap="round"/></g></svg>`,
+  smile:`<svg viewBox="0 0 100 100"><g stroke="#3a3a3a" stroke-width="5" stroke-linecap="round"><circle cx="50" cy="50" r="40" fill="#ffd400"/><path d="M34 40v10M66 40v10" fill="none" stroke-width="7"/><path d="M30 62q20 20 40 0" fill="none"/></g></svg>`
+};
+
+/* ===== 슬라이드 만들기 (캔바 페이지 순서와 동일) ===== */
+const S=[];  // {bg, label, html}
+
+// 1. 표지
+S.push({bg:'bg-sky',label:'표지 · 꿈 키움 재능마당',html:
+  cloud(-90,-50,560)+cloud(1460,-30,560)+cloud(-50,700,420)+cloud(1540,680,460)+
+  confetti(380,190,70,11)+confetti(1540,190,70,29)+
+  box('w','꿈 키움 재능마당',130,900,150,72,.05)+
+  box('y','1학년 2반',320,1640,300,230,.15)+
+  puppyBox('happy',.3)+
+  `<div class="pop" style="position:absolute;right:120px;bottom:60px;font-size:50px;color:#444;--d:.5s">내동초등학교</div>`});
+
+// 2. 관람 예절
+const rules=['발표하는 친구를 위해 뜨거운 박수를 보냅니다.','발표하는 중 주변 친구와 대화하지 않습니다.','선생님의 진행에 귀를 기울이고 따르도록 합니다.','발표가 모두 끝난 후 정리정돈은 함께 합니다.'];
+S.push({bg:'bg-blue',label:'관람 예절 안내',html:
+  box('w','관람 예절 안내',32,700,130,66,0)+
+  rules.map((t,i)=>box('p',t,193+i*213,1822,162,66,.1+i*.1)).join('')});
+
+// 3. 촬영 제한
+S.push({bg:'bg-blue',label:'촬영 제한 안내',html:
+  box('w','촬영 제한 안내',160,770,150,70,0)+
+  box('y','개인정보보호 및 원활한 발표회 진행을 위해<br>사진 및 동영상 촬영을 엄격히 금지합니다.',338,1822,330,80,.15)+
+  puppyBox('stern',.3)+
+  `<div class="warn pop" style="left:690px;top:760px;--d:.5s"><svg viewBox="0 0 100 100" width="100" height="100"><path d="M50 12L92 86H8Z" fill="#f6ee6b" stroke="#444" stroke-width="6" stroke-linejoin="round"/><path d="M50 38v26" stroke="#444" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="76" r="5" fill="#444"/></svg></div>`});
+
+// 4. 기다렸죠?
+S.push({bg:'bg-black',label:'기다렸죠?',html:`<div class="wait"><span>기다렸죠?</span></div>`});
+
+// 5~38. 발표 (인트로 + 상세) × 17
+PERFORMANCES.forEach(([title,who],i)=>{
+  const n=i+1;
+  S.push({bg:'bg-peach',label:`발표 (${n}) 안내`,html:
+    spark(300,260,50,'#f7a8b8')+spark(1560,420,44,'#f7c98a',.6)+
+    box('y',`발표 (${n})`,435,560,210,130,0)+puppyBox('clap',.2)});
+  S.push({bg:'bg-peach',label:`발표 (${n}) ${title}`,html:
+    cloudBank()+spark(190,610,70,'#f7a8b8')+spark(1650,300,66,'#f7a8b8',.8)+
+    box('w','큰 박수 부탁해요!',95,780,140,64,0)+
+    box('y',title,290,1380,340,190,.1)+
+    box('o',who,690,1080,190,92,.2)});
+});
+
+// 39. 함께 나눠요
+const blobs=()=>`<i class="blob" style="left:-170px;top:-190px;width:760px;height:620px;background:#c5f1c8"></i>
+  <i class="blob" style="right:-60px;top:-170px;width:980px;height:560px;background:#fff0a6"></i>
+  <i class="blob" style="left:-130px;bottom:-230px;width:640px;height:560px;background:#c8e6fb"></i>
+  <i class="blob" style="right:-110px;bottom:-190px;width:980px;height:620px;background:#ffd2d2"></i>`;
+const cards=[['#ffe892','bulb','친구들의<br>발표를 보고<br>느낀 점',55],['#fce8e8','cup','가장<br>기억에 남는<br>발표와 이유',515],['#d8f2fb','heart','우리반 친구들에게<br>해주고 싶은 말',976],['#cdecd9','smile','열심히 준비한<br>나에게<br>해주고 싶은 말',1440]];
+S.push({bg:'bg-blobs',label:'함께 나눠요',html:blobs()+
+  box('w','함께 나눠요',58,760,130,70,0)+
+  `<div class="pop" style="position:absolute;left:0;right:0;top:225px;text-align:center;font-size:54px;color:#444;--d:.1s">꿈 키움 재능 마당을 마치고 함께 생각을 나누어 봅시다.</div>`+
+  cards.map(([bg,ic,t,x],i)=>`<div class="card pop" style="left:${x}px;background:${bg};--d:${.2+i*.12}s">${ICON[ic]}<div>${t}</div></div>`).join('')});
+
+// 40. 마무리
+S.push({bg:'bg-blobs',label:'마무리 박수',html:blobs()+
+  box('w','모든 발표가 끝났습니다.',200,820,140,66,0)+
+  box('y','서로에게 박수로 마무리!',360,1620,250,150,.15)+
+  puppyBox('happy',.3)});
+
+const TOTAL=S.length;   // 40
+
+/* ===== 화면 구성 ===== */
+const stage=document.getElementById('stage');
+const musicEl=document.getElementById('music');
+S.forEach((s,i)=>{
+  const d=document.createElement('section');
+  d.className='slide '+s.bg; d.dataset.n=i+1; d.innerHTML=s.html;
+  stage.insertBefore(d,musicEl);
+});
+const slides=[...stage.querySelectorAll('.slide')];
+
+/* 박스 안 글자가 넘치면 자동으로 줄이기 */
+function fitAll(){
+  document.querySelectorAll('.fit').forEach(el=>{
+    let size=+el.dataset.size; const inner=el.firstElementChild;
+    el.style.fontSize=size+'px';
+    while(inner.offsetWidth>el.clientWidth-110 && size>26){size-=4;el.style.fontSize=size+'px';}
+  });
+}
+
+/* 화면 크기에 맞게 무대 크기 조절 */
+function resize(){
+  const k=Math.min(innerWidth/1920,innerHeight/1080);
+  stage.style.transform=`scale(${k})`;
+}
+addEventListener('resize',resize); resize();
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(fitAll);
+addEventListener('load',fitAll);
+
+/* ===== 슬라이드 이동 ===== */
+let cur=0;
+const pg=document.getElementById('pg');
+function go(n,fromHash){
+  n=Math.max(1,Math.min(TOTAL,n));
+  slides[cur-1<0?0:cur-1]&&slides[cur-1<0?0:cur-1].classList.remove('on');
+  slides.forEach((el,i)=>{ if(i!==n-1) el.classList.remove('on'); });
+  cur=n; slides[n-1].classList.add('on');
+  pg.textContent=`${n} / ${TOTAL}`;
+  if(!fromHash){ try{ history.replaceState(null,'','#'+n); }catch(_){} }
+  music.enter(MUSIC[n]);
+  document.querySelectorAll('.ov-grid button').forEach((b,i)=>b.classList.toggle('cur',i===n-1));
+}
+const next=()=>go(cur+1), prev=()=>go(cur-1);
+
+/* ===== 음악: 유튜브 구간 재생 ===== */
+const music=(function(){
+  const el=document.getElementById('music'), thumb=document.getElementById('mThumb'), ico=document.getElementById('mIco'),
+        prog=document.getElementById('mProg'), ttl=document.getElementById('mTitle'), tm=document.getElementById('mTime'),
+        msg=document.getElementById('mMsg'), hit=document.getElementById('mHit');
+  let yt=null, ready=false, creating=false, waiters=[], cfg=null, timer=null;
+
+  const sec=v=>{ if(typeof v==='number') return v; const p=String(v).trim().split(':').map(Number);
+    return p.length===3?p[0]*3600+p[1]*60+p[2]:p.length===2?p[0]*60+p[1]:p[0]; };
+  const fmt=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+  const setMsg=t=>{ msg.textContent=t||''; el.classList.toggle('err',!!t); };
+
+  function loadAPI(){
+    return new Promise((res,rej)=>{
+      if(window.YT&&YT.Player) return res();
+      const prevCb=window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady=()=>{ prevCb&&prevCb(); res(); };
+      if(!document.getElementById('yt-api')){
+        const s=document.createElement('script'); s.id='yt-api'; s.src='https://www.youtube.com/iframe_api';
+        s.onerror=()=>{ setMsg('유튜브에 연결할 수 없어요. 인터넷 연결을 확인해 주세요.'); rej(); };
+        document.head.appendChild(s);
+      }
+    });
+  }
+  function ensurePlayer(c){
+    return loadAPI().then(()=>new Promise(res=>{
+      if(ready) return res();
+      waiters.push(res);
+      if(creating) return;
+      creating=true;
+      const vars={playsinline:1,controls:0,rel:0,disablekb:1,modestbranding:1,iv_load_policy:3,fs:0};
+      if(/^https?:$/.test(location.protocol)) vars.origin=location.origin;
+      yt=new YT.Player('ytplayer',{width:'100%',height:'100%',videoId:c.id,playerVars:vars,events:{
+        onReady:()=>{ ready=true; waiters.splice(0).forEach(f=>f()); },
+        onStateChange:onState, onError:onErr }});
+    }));
+  }
+  function cue(){          // 시작/끝 구간을 지정해서 대기시키기
+    if(!ready||!cfg) return;
+    yt.cueVideoById({videoId:cfg.id,startSeconds:cfg._s,endSeconds:cfg._e});
+    yt.setVolume(100); ui('idle');
+  }
+  function ui(state){
+    el.classList.toggle('playing',state==='playing');
+    if(state==='playing') el.classList.add('started');
+    ico.textContent=state==='playing'?'❚❚':'▶';
+    if(state==='idle'){ el.classList.remove('started'); prog.style.width='0'; tm.textContent=fmt(cfg._e-cfg._s); }
+  }
+  function tick(){
+    if(!ready||!cfg) return;
+    const t=yt.getCurrentTime(), left=cfg._e-t;
+    prog.style.width=Math.min(100,Math.max(0,(t-cfg._s)/(cfg._e-cfg._s)*100))+'%';
+    tm.textContent='-'+fmt(left);
+    if(left<2) yt.setVolume(Math.max(0,Math.round(left/2*100)));   // 마지막 2초는 서서히 작아지게
+    if(left<=0.15){ yt.pauseVideo(); stopTimer(); cue(); }
+  }
+  const startTimer=()=>{ stopTimer(); timer=setInterval(tick,200); };
+  const stopTimer=()=>{ clearInterval(timer); timer=null; };
+  function onState(e){
+    const S=YT.PlayerState;
+    if(e.data===S.PLAYING){ setMsg(''); ui('playing'); startTimer(); }
+    else if(e.data===S.PAUSED){ stopTimer(); ico.textContent='▶'; el.classList.remove('playing'); }
+    else if(e.data===S.ENDED){ stopTimer(); cue(); }
+  }
+  function onErr(e){
+    const m={2:'영상 주소(ID)가 올바르지 않아요.',5:'이 영상은 재생할 수 없어요.',100:'영상이 삭제되었거나 비공개예요.',
+      101:'영상 주인이 외부 재생을 막아 두었어요. 다른 영상을 써 주세요.',150:'영상 주인이 외부 재생을 막아 두었어요. 다른 영상을 써 주세요.',
+      153:'이 파일을 그냥 열면 유튜브가 재생을 막을 수 있어요. 웹 주소(https)로 올려서 열어 보세요.'};
+    setMsg('재생 오류('+e.data+'): '+(m[e.data]||'영상을 불러오지 못했어요.')); stopTimer(); el.classList.remove('playing');
+  }
+
+  function toggle(){
+    if(!cfg) return;
+    if(!ready){ ensurePlayer(cfg).then(()=>{ if(cfg) cue(); }).catch(()=>{}); return; }
+    const st=yt.getPlayerState();
+    if(st===1||st===3) yt.pauseVideo(); else yt.playVideo();
+  }
+  function enter(c){
+    leave();
+    cfg=c?Object.assign({},c,{_s:sec(c.start||0),_e:sec(c.end)}):null;
+    if(!cfg){ el.classList.remove('show'); return; }
+    el.classList.add('show'); setMsg('');
+    el.classList.toggle('audio',!!cfg.audioOnly);
+    thumb.style.backgroundImage=cfg.audioOnly?'none':`url(https://i.ytimg.com/vi/${cfg.id}/hqdefault.jpg)`;
+    ttl.textContent=cfg.title||'음악'; ui('idle');
+    ensurePlayer(cfg).then(()=>{ if(cfg) cue(); }).catch(()=>{});   // 미리 준비해 두면 클릭 즉시 재생
+  }
+  function leave(){
+    stopTimer();
+    if(ready&&yt){ try{ yt.pauseVideo(); }catch(_){} }
+    cfg=null;
+  }
+  hit.addEventListener('click',e=>{ e.stopPropagation(); toggle(); });
+  hit.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); e.stopPropagation(); toggle(); } });
+  return {enter,toggle};
+})();
+
+/* ===== 목차 ===== */
+const ov=document.getElementById('overview'), ovGrid=document.getElementById('ovGrid');
+S.forEach((s,i)=>{
+  const b=document.createElement('button'); b.innerHTML=`<em>${i+1}${MUSIC[i+1]?' ♪':''}</em>${s.label}`;
+  b.onclick=()=>{ ov.hidden=true; go(i+1); }; ovGrid.appendChild(b);
+});
+const toggleOv=()=>{ ov.hidden=!ov.hidden; if(!ov.hidden){ const c=ovGrid.children[cur-1]; c&&c.focus(); } };
+const toggleFs=()=>{ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); };
+
+/* ===== 입력: 키보드 / 클릭 / 터치 / 클리커 ===== */
+addEventListener('keydown',e=>{
+  if(!ov.hidden){ if(e.key==='Escape'||e.key==='o'||e.key==='O'){ ov.hidden=true; } return; }
+  if(e.target.closest&&e.target.closest('#mHit')) return;
+  switch(e.key){
+    case 'ArrowRight':case 'ArrowDown':case 'PageDown':case ' ':case 'Enter': e.preventDefault(); next(); break;
+    case 'ArrowLeft':case 'ArrowUp':case 'PageUp':case 'Backspace': e.preventDefault(); prev(); break;
+    case 'Home': go(1); break;
+    case 'End': go(TOTAL); break;
+    case 'f':case 'F': toggleFs(); break;
+    case 'o':case 'O': toggleOv(); break;
+    case 'm':case 'M': music.toggle(); break;
+  }
+});
+stage.addEventListener('click',e=>{ if(e.target.closest('#music')) return; next(); });
+document.getElementById('bPrev').onclick=prev;
+document.getElementById('bNext').onclick=next;
+document.getElementById('bOv').onclick=toggleOv;
+document.getElementById('bFs').onclick=toggleFs;
+let sx=null;
+addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; },{passive:true});
+addEventListener('touchend',e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx; sx=null;
+  if(Math.abs(dx)>60){ dx<0?next():prev(); } },{passive:true});
+
+/* 마우스를 움직이면 조작 바 표시, 가만히 있으면 숨김 */
+let idleT; const wake=()=>{ document.body.classList.add('active'); document.body.classList.remove('idle'); clearTimeout(idleT);
+  idleT=setTimeout(()=>{ document.body.classList.remove('active'); document.body.classList.add('idle'); },2500); };
+addEventListener('mousemove',wake); wake();
+
+addEventListener('hashchange',()=>{ const n=parseInt(location.hash.slice(1)); if(n&&n!==cur) go(n,true); });
+go(parseInt(location.hash.slice(1))||1,true);
+</script>
+</body>
+</html>
