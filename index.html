@@ -64,6 +64,7 @@ body.idle{cursor:none}
 .card{position:absolute;top:396px;width:415px;height:620px;border:6px solid var(--line);border-radius:34px;
   display:flex;flex-direction:column;align-items:center;padding-top:50px;font-size:62px;line-height:1.3;text-align:center;color:#2b2b2b}
 .card svg{width:230px;height:230px;margin-bottom:34px}
+.card .one{display:inline-block;white-space:nowrap}   /* 한 줄 고정 (카드보다 길면 글자 크기를 자동으로 줄임) */
 
 /* 등장 애니메이션 (슬라이드가 켜질 때마다) */
 .slide.on .pop{animation:pop .6s var(--d,0s) both cubic-bezier(.34,1.56,.64,1)}
@@ -91,6 +92,31 @@ body.idle{cursor:none}
 .vmsg{display:none;position:absolute;left:0;right:0;bottom:290px;margin:0 auto;width:1100px;padding:18px 28px;z-index:4;text-align:center;
   font-family:'Noto Sans KR',sans-serif;font-size:36px;line-height:1.45;color:#b3261e;background:#fff3f1;border:6px solid var(--line);border-radius:24px}
 .slide.vp-err .vmsg{display:block}
+
+/* ===== 그림책 보기 (슬라이드 안에서 그림책 이미지를 넘겨 보는 뷰어) ===== */
+#bookBtn{all:unset;position:absolute;left:50%;bottom:28px;z-index:20;display:none;box-sizing:border-box;height:118px;padding:0 56px;
+  border-radius:59px;background:rgba(255,217,102,.97);border:7px solid var(--line);align-items:center;gap:18px;white-space:nowrap;
+  font-family:var(--font);font-size:52px;color:#333;cursor:pointer;box-shadow:0 8px 0 rgba(0,0,0,.2);transform:translateX(-50%);transition:transform .15s}
+#bookBtn.show{display:flex}
+#bookBtn:hover,#bookBtn:focus-visible{transform:translateX(-50%) scale(1.06)}
+#bookBtn.with-music{left:auto;right:70px;transform:none}          /* 음악 버튼이 같은 슬라이드에 있으면 오른쪽으로 비켜 줌 */
+#bookBtn.with-music:hover,#bookBtn.with-music:focus-visible{transform:scale(1.06)}
+#book{position:absolute;inset:0;z-index:40;background:#0b0b0d;display:none;align-items:center;justify-content:center}
+#book.open{display:flex}
+#bookImg{display:block;max-width:100%;max-height:100%;object-fit:contain;transition:opacity .18s}
+#bookImg:not([src]){visibility:hidden}
+#bookImg.fade{opacity:0}
+#bookPg{position:absolute;left:0;right:0;bottom:22px;text-align:center;color:rgba(255,255,255,.8);font-family:'Noto Sans KR',sans-serif;font-size:30px;
+  text-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none}
+#bookMsg{display:none;position:absolute;left:0;right:0;margin:0 auto;width:1200px;padding:22px 30px;text-align:center;font-family:'Noto Sans KR',sans-serif;
+  font-size:36px;line-height:1.5;color:#b3261e;background:#fff3f1;border:6px solid var(--line);border-radius:24px}
+.bk-ctl{all:unset;position:absolute;box-sizing:border-box;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;
+  cursor:pointer;opacity:0;transition:opacity .2s,background .15s}
+.bk-ctl:hover,.bk-ctl:focus-visible{background:rgba(255,255,255,.38)}
+body.active .bk-ctl{opacity:1}                                    /* 마우스를 움직이면 나타나고 가만히 두면 사라짐 */
+#bkPrev,#bkNext{top:50%;margin-top:-60px;width:120px;height:120px;font-size:54px}
+#bkPrev{left:30px}#bkNext{right:30px}
+#bkClose{top:28px;right:34px;width:88px;height:88px;font-size:40px}
 
 /* ===== 음악 버튼 (해당 슬라이드에서만 표시) ===== */
 #music{position:absolute;left:0;right:0;bottom:28px;z-index:20;display:none;justify-content:center;pointer-events:none}
@@ -137,6 +163,15 @@ body.active #ui{opacity:1}
 <div id="stage">
   <div id="music"><div class="m-list" id="mList"></div><div class="m-msg" id="mMsg"></div></div>
   <div id="ytbox"><div id="ytplayer"></div></div>
+  <button id="bookBtn" class="bk-btn" type="button"><span aria-hidden="true">📖</span><span>그림책 보기</span></button>
+  <div id="book" aria-hidden="true">
+    <img id="bookImg" alt="">
+    <div id="bookMsg"></div>
+    <button id="bkPrev" class="bk-ctl bk-btn" type="button" aria-label="이전 쪽">◀</button>
+    <button id="bkNext" class="bk-ctl bk-btn" type="button" aria-label="다음 쪽">▶</button>
+    <button id="bkClose" class="bk-ctl bk-btn" type="button" aria-label="그림책 닫기">✕</button>
+    <div id="bookPg"></div>
+  </div>
 </div>
 
 <div id="ui">
@@ -175,6 +210,16 @@ const MUSIC = {
   40: [ {title:'왜 이렇게 덥지',        yt:'LKYW4RrFjzo'} ],
 };
 
+/* =====================================================================
+   ★ 그림책 설정 — 슬라이드 안에서 그림책 이미지를 넘겨 볼 수 있어요 ★
+   슬라이드번호: { title:'그림책 제목', pages:[ '이미지 파일 이름', ... ] }   (이미지는 index.html과 같은 폴더)
+   - 그 슬라이드에 [📖 그림책 보기] 버튼이 생기고, 누르면(또는 B 키) 전체 화면으로 열립니다.
+   - 열린 상태: → / ← / 스페이스 / 클릭 = 쪽 넘기기,  마지막 쪽에서 한 번 더 넘기면 닫힘,  Esc = 닫기
+   ===================================================================== */
+const BOOK = {
+  16: { title:'도깨비 감투', pages: Array.from({length:14}, (_,i)=>`16_${i+1}.jpg`) },   // 16_1.jpg ~ 16_14.jpg
+};
+
 /* ===== 발표 순서 데이터 (캔바 내용 그대로) ===== */
 const PERFORMANCES = [
   ['네잎 클로버','1학년 2반 모두'],
@@ -182,7 +227,7 @@ const PERFORMANCES = [
   ['댄스','김민아, 박서아'],
   ['징글벨 락','박새룬'],
   ['초성 퀴즈','박서율, 윤설희'],
-  ['동화 구연','박하솔'],
+  ['도깨비 감투','박하솔'],
   ['노래 부르기','손승연, 이하린'],
   ['그림 발표','안채원, 이시예'],
   ['퀴즈','안아린'],
@@ -312,7 +357,7 @@ const blobs=()=>`<i class="blob" style="left:-170px;top:-190px;width:760px;heigh
   <i class="blob" style="right:-60px;top:-170px;width:980px;height:560px;background:#fff0a6"></i>
   <i class="blob" style="left:-130px;bottom:-230px;width:640px;height:560px;background:#c8e6fb"></i>
   <i class="blob" style="right:-110px;bottom:-190px;width:980px;height:620px;background:#ffd2d2"></i>`;
-const cards=[['#ffe892','bulb','친구들의<br>발표를 보고<br>느낀 점',55],['#fce8e8','cup','가장<br>기억에 남는<br>발표와 이유',515],['#d8f2fb','heart','우리반<br>친구들에게<br>해주고 싶은 말',976],['#cdecd9','smile','열심히 준비한<br>나에게<br>해주고 싶은 말',1440]];
+const cards=[['#ffe892','bulb','친구들의<br>발표를 보고<br>느낀 점',55],['#fce8e8','cup','가장<br>기억에 남는<br>발표와 이유',515],['#d8f2fb','heart','<span class="one">우리반 친구들에게</span><br>해주고 싶은 말',976],['#cdecd9','smile','열심히 준비한<br>나에게<br>해주고 싶은 말',1440]];
 S.push({bg:'bg-blobs',label:'함께 나눠요',html:blobs()+
   box('w','함께 나눠요',58,760,130,70,0)+
   `<div class="pop" style="position:absolute;left:0;right:0;top:225px;text-align:center;font-size:54px;color:#444;--d:.1s">꿈 키움 재능 마당을 마치고 함께 생각을 나누어 봅시다.</div>`+
@@ -343,6 +388,12 @@ function fitAll(){
     el.style.fontSize=size+'px';
     while(inner.offsetWidth>el.clientWidth-110 && size>26){size-=4;el.style.fontSize=size+'px';}
   });
+  /* 함께 나눠요 카드: 한 줄로 고정한 문구가 카드 안에 들어오도록 글자 크기 조절 */
+  document.querySelectorAll('.card .one').forEach(el=>{
+    const max=el.closest('.card').clientWidth-24;      // 카드 안쪽 좌우 여백 12px씩
+    let size=62; el.style.fontSize=size+'px';
+    while(el.offsetWidth>max && size>24){ size-=1; el.style.fontSize=size+'px'; }
+  });
 }
 
 /* 화면 크기에 맞게 무대 크기 조절 */
@@ -365,11 +416,12 @@ function go(n,fromHash){
   pg.textContent=`${n} / ${TOTAL}`;
   if(!fromHash){ try{ history.replaceState(null,'','#'+n); }catch(_){} }
   music.enter(MUSIC[n]);
+  book.sync(n);
   resetVideos(slides[n-1]);
   document.querySelectorAll('.ov-grid button').forEach((b,i)=>b.classList.toggle('cur',i===n-1));
 }
-const prev=()=>go(cur-1);
-const next=()=>go(cur+1);
+const prev=()=>book.isOpen()?book.prev():go(cur-1);     // 그림책이 열려 있으면 쪽 넘기기
+const next=()=>book.isOpen()?book.next():go(cur+1);
 
 /* ===== 음악: 유튜브 구간 재생 + 음원 파일 재생 =====
    한 슬라이드에 음원이 여러 개면 버튼이 여러 개 생기고, 한 번에 하나만 재생됩니다.
@@ -501,6 +553,47 @@ const music=(function(){
   return {enter,toggle};
 })();
 
+/* ===== 그림책 보기 =====
+   BOOK 에 등록된 슬라이드에서만 버튼이 보이고, 슬라이드를 벗어나면 자동으로 닫힙니다. */
+const book=(function(){
+  const btn=document.getElementById('bookBtn'), box=document.getElementById('book'), img=document.getElementById('bookImg'),
+        pgEl=document.getElementById('bookPg'), msg=document.getElementById('bookMsg');
+  let cfg=null, i=0, opened=false, keep=[];
+  const preload=n=>{ if(!cfg||n<0||n>=cfg.pages.length) return; const im=new Image(); im.src=cfg.pages[n]; keep.push(im); };
+
+  function show(n){
+    i=n; msg.style.display='none'; img.classList.add('fade');
+    pgEl.textContent=(n+1)+' / '+cfg.pages.length;
+    const src=cfg.pages[n], t=new Image();                       // 새 그림이 다 불러와진 뒤에 바꿔서 깜빡임 방지
+    t.onload=()=>{ if(!opened||i!==n) return; img.src=src; img.alt=cfg.title+' '+(n+1)+'쪽'; img.classList.remove('fade'); };
+    t.onerror=()=>{ if(!opened||i!==n) return; img.removeAttribute('src'); img.classList.remove('fade');
+      msg.textContent='그림 파일('+src+')을 불러오지 못했어요. index.html과 같은 폴더에 있는지, 파일 이름이 같은지 확인해 주세요.'; msg.style.display='block'; };
+    t.src=src;
+    preload(n+1); preload(n-1);
+  }
+  function open(){ if(!cfg||opened) return; opened=true; box.classList.add('open'); box.setAttribute('aria-hidden','false'); show(0); }
+  function close(){ if(!opened) return; opened=false; box.classList.remove('open'); box.setAttribute('aria-hidden','true'); img.removeAttribute('src'); msg.style.display='none'; }
+  function sync(n){                                                // 슬라이드가 바뀔 때마다 호출
+    close(); cfg=BOOK[n]||null; keep=[];
+    btn.classList.toggle('show',!!cfg);
+    btn.classList.toggle('with-music',!!(cfg&&MUSIC[n]));
+    if(cfg){ btn.setAttribute('aria-label',cfg.title+' 그림책 보기'); preload(0); preload(1); }   // 첫 장은 미리 받아 두기
+  }
+  const next=()=>{ if(!opened) return; if(i<cfg.pages.length-1) show(i+1); else close(); };   // 마지막 쪽에서 넘기면 닫힘
+  const prev=()=>{ if(!opened) return; if(i>0) show(i-1); else close(); };
+  const first=()=>{ if(opened) show(0); }, last=()=>{ if(opened) show(cfg.pages.length-1); };
+  const toggle=()=>{ opened?close():open(); };
+
+  [btn,document.getElementById('bkPrev'),document.getElementById('bkNext'),document.getElementById('bkClose')].forEach(b=>{
+    b.addEventListener('mousedown',e=>e.preventDefault());       // 클릭 후 포커스가 남아 키보드 조작을 방해하지 않도록
+  });
+  btn.addEventListener('click',e=>{ e.stopPropagation(); open(); });
+  document.getElementById('bkPrev').addEventListener('click',e=>{ e.stopPropagation(); prev(); });
+  document.getElementById('bkNext').addEventListener('click',e=>{ e.stopPropagation(); next(); });
+  document.getElementById('bkClose').addEventListener('click',e=>{ e.stopPropagation(); close(); });
+  return {sync,open,close,next,prev,first,last,toggle,isOpen:()=>opened};
+})();
+
 /* ===== 영상 슬라이드: 4번 오프닝 =====
    ▶ 버튼을 눌러야 재생됩니다.  재생 중 영상을 클릭하면 일시정지 / 다시 클릭하면 이어서 재생.
    키보드(→, 스페이스, 리모컨 등)는 항상 '다음 슬라이드'로 넘어갑니다. */
@@ -539,18 +632,20 @@ const toggleFs=()=>{ document.fullscreenElement?document.exitFullscreen():docume
 /* ===== 입력: 키보드 / 클릭 / 터치 / 클리커 ===== */
 addEventListener('keydown',e=>{
   if(!ov.hidden){ if(e.key==='Escape'||e.key==='o'||e.key==='O'){ ov.hidden=true; } return; }
-  if(e.target.closest&&e.target.closest('.m-btn,.vplay')) return;   // 버튼에 포커스가 있을 땐 버튼 동작 우선
+  if(e.target.closest&&e.target.closest('.m-btn,.vplay,.bk-btn')) return;   // 버튼에 포커스가 있을 땐 버튼 동작 우선
   switch(e.key){
     case 'ArrowRight':case 'ArrowDown':case 'PageDown':case ' ':case 'Enter': e.preventDefault(); next(); break;
     case 'ArrowLeft':case 'ArrowUp':case 'PageUp':case 'Backspace': e.preventDefault(); prev(); break;
-    case 'Home': go(1); break;
-    case 'End': go(TOTAL); break;
+    case 'Home': book.isOpen()?book.first():go(1); break;
+    case 'End': book.isOpen()?book.last():go(TOTAL); break;
+    case 'Escape': if(book.isOpen()) book.close(); break;
+    case 'b':case 'B': book.toggle(); break;
     case 'f':case 'F': toggleFs(); break;
     case 'o':case 'O': toggleOv(); break;
     case 'm':case 'M': music.toggle(); break;
   }
 });
-stage.addEventListener('click',e=>{ if(e.target.closest('#music,.vplay,.vid')) return; next(); });
+stage.addEventListener('click',e=>{ if(e.target.closest('#music,.vplay,.vid,.bk-btn')) return; next(); });
 document.getElementById('bPrev').onclick=prev;
 document.getElementById('bNext').onclick=next;
 document.getElementById('bOv').onclick=toggleOv;
